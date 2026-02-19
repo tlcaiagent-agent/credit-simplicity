@@ -18,7 +18,7 @@ export default function Home() {
           <div className="flex items-center gap-6">
             <a href="#how-it-works" className="text-sm text-gray-600 hover:text-navy-900 hidden sm:block">How It Works</a>
             <a href="#benefits" className="text-sm text-gray-600 hover:text-navy-900 hidden sm:block">Benefits</a>
-            <Link href="/portal" className="text-sm text-gray-600 hover:text-navy-900">Portal Login</Link>
+            <Link href="/portal/login" className="text-sm text-gray-600 hover:text-navy-900">Portal Login</Link>
             <Link href="/apply" className="bg-navy-900 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-navy-800 transition-colors">
               Get Started
             </Link>

@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { supabase, isDemoMode } from '@/lib/supabase'
 
 const navItems = [
   { href: '/portal', label: 'Dashboard', icon: '📊' },
@@ -12,6 +14,38 @@ const navItems = [
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [user, setUser] = useState<any>(null)
+  const [checked, setChecked] = useState(false)
+
+  useEffect(() => {
+    if (isDemoMode || !supabase) {
+      setChecked(true)
+      return
+    }
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user && pathname !== '/portal/login') {
+        router.push('/portal/login')
+      } else {
+        setUser(data.user)
+      }
+      setChecked(true)
+    })
+  }, [pathname, router])
+
+  // Don't wrap login page in portal layout
+  if (pathname === '/portal/login') return <>{children}</>
+
+  if (!checked) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-400">Loading...</div></div>
+
+  const initials = user?.user_metadata?.name
+    ? user.user_metadata.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+    : isDemoMode ? 'DM' : '??'
+
+  const handleLogout = async () => {
+    if (supabase) await supabase.auth.signOut()
+    router.push('/portal/login')
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -25,8 +59,11 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             <span className="font-semibold text-sm">Credit Simplicity</span>
           </Link>
           <div className="flex items-center gap-4">
-            <span className="text-xs text-navy-200 hidden sm:block">Demo Mode</span>
-            <div className="w-8 h-8 bg-navy-700 rounded-full flex items-center justify-center text-xs font-medium">JS</div>
+            {isDemoMode && <span className="text-xs text-navy-200 hidden sm:block">Demo Mode</span>}
+            <button onClick={handleLogout} className="text-xs text-navy-300 hover:text-white transition-colors">
+              Sign Out
+            </button>
+            <div className="w-8 h-8 bg-navy-700 rounded-full flex items-center justify-center text-xs font-medium">{initials}</div>
           </div>
         </div>
       </header>

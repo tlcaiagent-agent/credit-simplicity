@@ -1,16 +1,33 @@
 'use client'
 
-import { mockLoanApplication, mockBorrower, statusSteps, type LoanStatus } from '@/lib/mock-data'
+import { useEffect, useState } from 'react'
+import { getPortalData } from '@/lib/portal-data'
+import { statusSteps, type LoanStatus } from '@/lib/mock-data'
 
 export default function PortalDashboard() {
-  const currentStatus = mockLoanApplication.status
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getPortalData().then(d => { setData(d); setLoading(false) })
+  }, [])
+
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="text-gray-400">Loading...</div></div>
+  if (!data) return <div className="text-center py-20 text-gray-500">Unable to load data. Please log in.</div>
+
+  const { borrower, loan, documents } = data
+  const currentStatus: LoanStatus = loan?.status || 'applied'
   const currentIdx = statusSteps.findIndex(s => s.key === currentStatus)
+  const docsUploaded = documents?.filter((d: any) => d.status !== 'not_started').length || 0
+  const docsTotal = documents?.length || 0
+  const nextMeeting = data.meetings?.find((m: any) => m.status === 'scheduled')
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-navy-950">Welcome back, {mockBorrower.name.split(' ')[0]}</h1>
-        <p className="text-gray-500 text-sm mt-1">{mockBorrower.company_name}</p>
+        <h1 className="text-2xl font-bold text-navy-950">Welcome back, {borrower?.name?.split(' ')[0] || 'there'}</h1>
+        <p className="text-gray-500 text-sm mt-1">{borrower?.company_name}</p>
+        {data.isDemo && <p className="text-xs text-yellow-600 mt-1">📋 Demo Mode — showing sample data</p>}
       </div>
 
       {/* Status Timeline */}
@@ -20,7 +37,6 @@ export default function PortalDashboard() {
           {statusSteps.map((step, idx) => {
             const done = idx < currentIdx
             const active = idx === currentIdx
-            const future = idx > currentIdx
             return (
               <div key={step.key} className="flex items-center flex-1 min-w-0 last:flex-none">
                 <div className="flex flex-col items-center">
@@ -50,38 +66,46 @@ export default function PortalDashboard() {
       <div className="grid sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl p-6 border border-gray-100">
           <div className="text-sm text-gray-500 mb-1">Loan Amount</div>
-          <div className="text-2xl font-bold text-navy-950">${(mockLoanApplication.amount_requested / 1000).toFixed(0)}K</div>
+          <div className="text-2xl font-bold text-navy-950">{loan?.amount_requested || 'N/A'}</div>
         </div>
         <div className="bg-white rounded-2xl p-6 border border-gray-100">
           <div className="text-sm text-gray-500 mb-1">Documents</div>
-          <div className="text-2xl font-bold text-navy-950">4 / 10</div>
+          <div className="text-2xl font-bold text-navy-950">{docsUploaded} / {docsTotal}</div>
           <div className="text-xs text-gray-400 mt-1">uploaded</div>
         </div>
         <div className="bg-white rounded-2xl p-6 border border-gray-100">
           <div className="text-sm text-gray-500 mb-1">Next Meeting</div>
-          <div className="text-lg font-bold text-navy-950">Jan 25</div>
-          <div className="text-xs text-gray-400 mt-1">Document Review</div>
+          {nextMeeting ? (
+            <>
+              <div className="text-lg font-bold text-navy-950">
+                {new Date(nextMeeting.scheduled_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </div>
+              <div className="text-xs text-gray-400 mt-1">{nextMeeting.meeting_type}</div>
+            </>
+          ) : (
+            <div className="text-lg font-bold text-gray-300">None scheduled</div>
+          )}
         </div>
       </div>
 
       {/* Recent Activity */}
       <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100">
-        <h2 className="text-lg font-semibold text-navy-950 mb-4">Recent Activity</h2>
+        <h2 className="text-lg font-semibold text-navy-950 mb-4">Recent Messages</h2>
         <div className="space-y-4">
-          {[
-            { date: 'Jan 20', text: 'Needs list sent — 10 documents requested', type: 'info' },
-            { date: 'Jan 18', text: 'Initial meeting completed with Sarah Chen', type: 'success' },
-            { date: 'Jan 16', text: 'Analyst assigned: Sarah Chen', type: 'info' },
-            { date: 'Jan 15', text: 'Application submitted', type: 'success' },
-          ].map((a, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${a.type === 'success' ? 'bg-green-400' : 'bg-navy-300'}`} />
+          {(data.messages || []).slice(-4).reverse().map((msg: any, i: number) => (
+            <div key={msg.id || i} className="flex items-start gap-3">
+              <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 bg-navy-300" />
               <div>
-                <p className="text-sm text-gray-700">{a.text}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{a.date}</p>
+                <p className="text-sm text-gray-700">{msg.message}</p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {msg.from_name || msg.from} · {new Date(msg.created_at || msg.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </p>
               </div>
             </div>
           ))}
+          {(!data.messages || data.messages.length === 0) && (
+            <p className="text-gray-400 text-sm">No messages yet</p>
+          )}
         </div>
       </div>
     </div>
