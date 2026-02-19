@@ -62,7 +62,7 @@ export default function ApplyPage() {
 
       <div className="max-w-2xl mx-auto px-6 py-12">
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-navy-950 mb-3">Start Your Application</h1>
+          <h1 className="text-3xl font-bold text-navy-950 mb-3">Tell Us About Your Business</h1>
           <p className="text-gray-500">Takes about 5 minutes. No credit pull, no obligation.</p>
         </div>
 
@@ -149,7 +149,7 @@ export default function ApplyPage() {
             disabled={loading}
             className="w-full bg-navy-900 text-white py-4 rounded-xl font-medium hover:bg-navy-800 transition-all disabled:opacity-60 disabled:cursor-not-allowed text-base"
           >
-            {loading ? 'Submitting...' : 'Submit Application →'}
+            {loading ? 'Submitting...' : 'Get My Free Assessment →'}
           </button>
           <p className="text-xs text-gray-400 text-center">
             By submitting, you agree to our Terms of Service and Privacy Policy. No credit pull at this stage.

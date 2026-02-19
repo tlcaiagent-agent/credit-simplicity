@@ -20,7 +20,7 @@ export default function Home() {
             <a href="#benefits" className="text-sm text-gray-600 hover:text-navy-900 hidden sm:block">Benefits</a>
             <Link href="/portal" className="text-sm text-gray-600 hover:text-navy-900">Portal Login</Link>
             <Link href="/apply" className="bg-navy-900 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-navy-800 transition-colors">
-              Apply Now
+              Get Started
             </Link>
           </div>
         </div>
@@ -41,7 +41,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/apply" className="bg-navy-900 text-white px-8 py-3.5 rounded-xl text-base font-medium hover:bg-navy-800 transition-all hover:shadow-lg">
-              Start Your Application →
+              Get Started →
             </Link>
             <a href="#how-it-works" className="border border-gray-200 text-gray-700 px-8 py-3.5 rounded-xl text-base font-medium hover:border-gray-300 transition-colors">
               Learn More
@@ -104,7 +104,7 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-white mb-4">Ready to simplify your lending?</h2>
           <p className="text-navy-200 mb-8 text-lg">No obligation. No credit pull. Just a conversation about your business.</p>
           <Link href="/apply" className="inline-block bg-white text-navy-900 px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-gray-100 transition-colors">
-            Start Your Application →
+            Get Started →
           </Link>
         </div>
       </section>
