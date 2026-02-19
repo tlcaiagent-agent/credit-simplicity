@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            from: 'Credit Simplicity <noreply@creditsimplicity.com>',
+            from: 'Credit Simplicity <onboarding@resend.dev>',
             to: email,
             subject: 'Application Received — Credit Simplicity',
             html: `
