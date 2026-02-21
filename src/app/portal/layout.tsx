@@ -24,7 +24,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       return
     }
     supabase.auth.getUser().then(({ data }) => {
-      if (!data.user && pathname !== '/portal/login') {
+      if (!data.user && pathname !== '/portal/login' && pathname !== '/portal/setup') {
         router.push('/portal/login')
       } else {
         setUser(data.user)
@@ -33,8 +33,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     })
   }, [pathname, router])
 
-  // Don't wrap login page in portal layout
-  if (pathname === '/portal/login') return <>{children}</>
+  // Don't wrap login and setup pages in portal layout
+  if (pathname === '/portal/login' || pathname === '/portal/setup') return <>{children}</>
 
   if (!checked) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-400">Loading...</div></div>
 

@@ -70,9 +70,23 @@ export async function POST(req: NextRequest) {
       message: `Welcome, ${name.split(' ')[0]}! We've received your application and will assign you a dedicated analyst shortly.`,
     })
 
-    // 6. Send magic link for portal access
+    // 6. Generate invite link for account setup
+    let inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.creditsimplicity.com'}/portal/setup`
+    
     if (authUserId) {
-      await supabase.auth.admin.generateLink({ type: 'magiclink', email })
+      const { data: inviteData, error: inviteError } = await supabase.auth.admin.generateLink({
+        type: 'invite',
+        email,
+        options: {
+          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.creditsimplicity.com'}/portal/setup`
+        }
+      })
+      
+      if (inviteData?.properties?.action_link) {
+        inviteUrl = inviteData.properties.action_link
+      } else if (inviteError) {
+        console.error('Invite link generation error:', inviteError)
+      }
     }
 
     // 7. Send confirmation email via Resend
@@ -85,12 +99,15 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             from: 'Credit Simplicity <noreply@creditsimplicity.com>',
             to: email,
-            subject: 'Application Received — Credit Simplicity',
+            subject: 'Set Up Your Account — Credit Simplicity',
             html: `
-              <h2>Thank you, ${name.split(' ')[0]}!</h2>
+              <h2>Welcome, ${name.split(' ')[0]}!</h2>
               <p>We've received your loan application for ${amount_requested}.</p>
-              <p>Your dedicated portal is ready. You'll receive a login link shortly to track your application progress, upload documents, and communicate with your analyst.</p>
-              <p><a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://credit-simplicity.vercel.app'}/portal">Go to Your Portal →</a></p>
+              <p>Your dedicated portal is ready. Click the button below to set up your account and start tracking your application progress, upload documents, and communicate with your analyst.</p>
+              <p style="margin: 24px 0;">
+                <a href="${inviteUrl}" style="background: #1e293b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 500;">Set Up Your Account →</a>
+              </p>
+              <p style="font-size: 14px; color: #666;">If the button doesn't work, copy and paste this link: ${inviteUrl}</p>
               <p>— The Credit Simplicity Team</p>
             `,
           }),
